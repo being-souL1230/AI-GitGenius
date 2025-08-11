@@ -1,0 +1,207 @@
+/* Compact Analytics Styles */
+.compact-analytics .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  min-height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.compact-analytics .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.24);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.compact-analytics .stat-card .stat-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.22), rgba(0,212,255,0.08));
+  border: 1px solid rgba(0,212,255,0.25);
+}
+
+.compact-analytics .stat-card .stat-icon i {
+  color: #00d4ff;
+  font-size: 0.95rem;
+}
+
+.compact-analytics .stat-card .stat-content h3 {
+  font-size: 1.05rem;
+  line-height: 1.1;
+  margin: 0 0 2px 0;
+}
+
+.compact-analytics .stat-card .stat-content p {
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Cards and headers compact spacing */
+.compact-analytics .glass-card {
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  backdrop-filter: blur(10px);
+}
+
+.compact-analytics .glass-card .card-header {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.compact-analytics .glass-card .card-header h4,
+.compact-analytics .tab-header h2 {
+  font-size: 1.06rem;
+  margin: 0;
+}
+
+.compact-analytics .glass-card .card-body {
+  padding: 10px;
+}
+
+.compact-analytics .row > [class*='col-'] {
+  margin-bottom: 0.5rem;
+}
+
+/* Security metrics - compact, pill-like items */
+.compact-analytics .security-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compact-analytics .security-metrics .metric-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px 9px 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+}
+
+/* Colored left bar per severity using position in list */
+.compact-analytics .security-metrics .metric-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 10px 0 0 10px;
+}
+
+/* 1: Critical, 2: High, 3: Medium, 4: Low */
+.compact-analytics .security-metrics .metric-item:nth-child(1)::before { background: #ef4444; }
+.compact-analytics .security-metrics .metric-item:nth-child(2)::before { background: #f59e0b; }
+.compact-analytics .security-metrics .metric-item:nth-child(3)::before { background: #eab308; }
+.compact-analytics .security-metrics .metric-item:nth-child(4)::before { background: #10b981; }
+
+.compact-analytics .security-metrics .metric-label {
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.compact-analytics .security-metrics .metric-value {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Charts compact height and horizontal padding */
+.compact-analytics canvas {
+  max-height: 210px;
+}
+
+/* Tighten tab header spacing */
+.compact-analytics .tab-header {
+  margin-bottom: 8px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 992px) {
+  .compact-analytics .stat-card { min-height: 52px; padding: 9px 10px; }
+  .compact-analytics .stat-card .stat-icon { width: 30px; height: 30px; min-width: 30px; }
+  .compact-analytics .stat-card .stat-content h3 { font-size: 1rem; }
+  .compact-analytics .security-metrics .metric-item { padding: 8px 9px 8px 10px; }
+} 
+
+/* Layout tweaks to reduce scroll and avoid overly wide rectangles */
+.compact-analytics .row {
+  --bs-gutter-x: 0.75rem;
+  --bs-gutter-y: 0.5rem;
+}
+
+/* Ensure cards don't stretch too tall/wide visually */
+.compact-analytics .glass-card {
+  max-width: 100%;
+}
+
+/* Limit inner content width for large screens so cards feel compact */
+@media (min-width: 1200px) {
+  .compact-analytics .glass-card .card-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Make charts feel horizontally compact inside cards */
+.compact-analytics .glass-card canvas {
+  padding-left: 4px;
+  padding-right: 4px;
+} 
+
+/* Tech tags (technology breakdown as tags) */
+.compact-analytics .tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compact-analytics .tech-tags .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.compact-analytics .tech-tags .tag .badge {
+  background: rgba(0,212,255,0.18);
+  color: #00d4ff;
+  border: 1px solid rgba(0,212,255,0.28);
+  font-weight: 600;
+} 
+
+/* Equal height cards in analytics */
+.compact-analytics .equal-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-analytics .equal-card .card-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Prevent overly tall charts from forcing card height */
+.compact-analytics .equal-card canvas {
+  flex: 1 1 auto;
+  max-height: 220px;
+} 

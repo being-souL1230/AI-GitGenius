@@ -1,4 +1,4 @@
-# GitGenius - AI-Powered Test Case Generator
+# GitGenius - AI-Powered Test Case Generator (Made by: Anshi2616, She was not able to upload this on her account so she pushed the repo to my account, thanks for sharing it!)
 
 GitGenius is an intelligent web application that automatically generates comprehensive test cases for your GitHub repositories using advanced AI technology. The application integrates with GitHub OAuth for seamless repository access and leverages Groq's powerful language models to create production-ready test cases for your codebase.
 

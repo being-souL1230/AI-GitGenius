@@ -25,7 +25,7 @@ def home():
 def github_auth():
     """Redirect to GitHub OAuth"""
     # Use localhost callback URL for development
-    callback_url = 'http://localhost:5000/auth/github/callback'
+    callback_url = 'https://ai-gitgenius.onrender.com/auth/github/callback'
     
     github_auth_url = (
         f"https://github.com/login/oauth/authorize?"

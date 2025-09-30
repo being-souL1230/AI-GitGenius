@@ -17,6 +17,7 @@ class Dashboard {
         this.initGeneratorTab();
         this.initAnalyticsTab();
         this.initPullRequestsTab();
+        this.initTestCasesTab();
         this.initModals();
         this.initMonacoEditor();
         
@@ -552,8 +553,13 @@ class Dashboard {
                 edge_cases: edgeCases
             });
             
-            // Display results in Monaco editor
-            const testContent = response.results.map(result => result.test_content).join('\n\n');
+            // Display only the raw test code in Monaco editor
+            const testContent = response.results
+                .map(result => result.test_content)
+                .join('\n\n')
+                .replace(/^[\s\S]*?```(?:python|javascript|java|typescript)?\s*\n?/m, '')
+                .replace(/\n?```[\s\S]*$/, '')
+                .trim();
             this.setMonacoContent(testContent);
             
             const generatedTestCase = {
@@ -791,7 +797,7 @@ class Dashboard {
         require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.41.0/min/vs' } });
         require(['vs/editor/editor.main'], () => {
             this.monacoEditor = monaco.editor.create(document.getElementById('test-editor'), {
-                value: '# Generated test cases will appear here...',
+                value: '',
                 language: 'python',
                 theme: 'vs-dark',
                 minimap: { enabled: false },
@@ -804,7 +810,8 @@ class Dashboard {
     
     setMonacoContent(content) {
         if (this.monacoEditor) {
-            this.monacoEditor.setValue(content);
+            // Set the content directly without any additional text
+            this.monacoEditor.setValue(content || '');
         }
     }
     
@@ -1901,6 +1908,15 @@ class Dashboard {
         `;
     }
     
+    // Initialize Test Cases Tab
+    initTestCasesTab() {
+        // Add event listener for refresh button
+        document.getElementById('refresh-test-cases')?.addEventListener('click', () => {
+            this.loadTestCases();
+            Utils.showToast('Test cases refreshed!', 'success');
+        });
+    }
+    
     // Test Cases Tab
     async loadTestCases() {
         if (this.currentTab !== 'test-cases') return;
@@ -2005,68 +2021,131 @@ if __name__ == '__main__':
     
     renderTestCases(testCases) {
         const container = document.getElementById('test-cases-list');
+        const countElement = document.getElementById('test-cases-count');
         
         if (!testCases || testCases.length === 0) {
             container.innerHTML = `
-                <div class="empty-state text-center p-5">
-                    <i class="fas fa-flask fa-3x mb-3 text-muted"></i>
-                    <h4>No test cases yet</h4>
-                    <p class="text-muted">Generate some test cases to see them here.</p>
-                </div>
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="test-cases-empty">
+                            <i class="fas fa-flask"></i>
+                            <h4>No test cases yet</h4>
+                            <p>Generate some test cases to see them here.</p>
+                        </div>
+                    </td>
+                </tr>
             `;
+            countElement.textContent = 'No test cases found';
             return;
         }
         
+        // Update count
+        countElement.textContent = `Showing ${testCases.length} test cases`;
+        
+        // Render test cases in table
         container.innerHTML = testCases.map(testCase => `
-            <div class="test-case-card glass-card">
-                <div class="test-case-header">
-                    <div>
-                        <h4 class="test-case-title">${testCase.name}</h4>
-                        <p class="test-case-meta">${testCase.repository} • ${Utils.formatDate(testCase.created_at)}</p>
-                    </div>
-                    <div class="test-case-stats">
-                        <div class="test-case-stat">
-                            <strong>${testCase.test_count}</strong><br>
-                            <small>Tests</small>
+            <tr>
+                <td data-label="Test Name">
+                    <div class="test-case-name">
+                        <div>
+                            <div class="fw-semibold">${testCase.name}</div>
+                            <div class="test-case-description">
+                                ${testCase.description ? testCase.description.substring(0, 60) + (testCase.description.length > 60 ? '...' : '') : 'No description'}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="test-case-content">
-                    <p>${testCase.description || 'No description available.'}</p>
-                    <div class="badge bg-primary">${testCase.technology}</div>
-                    ${testCase.edge_cases ? testCase.edge_cases.map(ec => `<span class="badge bg-secondary ms-1">${ec}</span>`).join('') : ''}
-                </div>
-                <div class="test-case-actions">
-                    <button class="btn btn-sm btn-outline-primary view-test-btn" data-id="${testCase.id}">
-                        <i class="fas fa-eye me-1"></i>View
-                    </button>
-                    <button class="btn btn-sm btn-outline-success copy-test-btn" data-id="${testCase.id}">
-                        <i class="fas fa-copy me-1"></i>Copy
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger delete-test-btn" data-id="${testCase.id}">
-                        <i class="fas fa-trash me-1"></i>Delete
-                    </button>
-                </div>
-            </div>
+                </td>
+                <td data-label="Repository">
+                    <div class="test-case-repo">
+                        <i class="fas fa-folder repo-icon"></i>
+                        <span>${testCase.repository || 'N/A'}</span>
+                    </div>
+                </td>
+                <td data-label="Technology">
+                    <span class="test-case-tech">
+                        <i class="fas fa-code"></i>
+                        ${testCase.technology || 'Unknown'}
+                    </span>
+                </td>
+                <td data-label="Date">
+                    <div class="test-case-date">
+                        ${Utils.formatDate(testCase.created_at)}
+                    </div>
+                </td>
+                <td data-label="Tests" class="text-center">
+                    <span class="test-case-count">
+                        ${testCase.test_count || '0'}
+                    </span>
+                </td>
+                <td data-label="Actions" class="text-end">
+                    <div class="test-case-actions">
+                        <button class="btn btn-action btn-view view-test-btn" data-id="${testCase.id}" 
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-action btn-delete delete-test-btn" data-id="${testCase.id}"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
         `).join('');
         
-        // Add event listeners
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Add event listeners for table rows
+        container.querySelectorAll('tr').forEach(row => {
+            // Skip if it's a placeholder or header row
+            if (row.querySelector('.test-cases-empty') || row.querySelector('th')) return;
+            
+            // Make rows clickable
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', (e) => {
+                // Don't trigger if clicking on action buttons
+                if (e.target.closest('.btn-action')) return;
+                
+                const viewBtn = row.querySelector('.view-test-btn');
+                if (viewBtn) {
+                    const testId = viewBtn.getAttribute('data-id');
+                    this.viewTestCase(testId);
+                }
+            });
+            
+            // Hover effect
+            row.addEventListener('mouseenter', () => {
+                row.style.backgroundColor = 'rgba(30, 64, 175, 0.1)';
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                row.style.backgroundColor = '';
+            });
+        });
+        
+        // Add event listeners for action buttons
         container.querySelectorAll('.view-test-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const testId = btn.getAttribute('data-id');
                 this.viewTestCase(testId);
             });
         });
         
         container.querySelectorAll('.copy-test-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const testId = btn.getAttribute('data-id');
                 this.copyTestCase(testId);
             });
         });
         
         container.querySelectorAll('.delete-test-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const testId = btn.getAttribute('data-id');
                 this.deleteTestCase(testId);
             });
@@ -2204,7 +2283,7 @@ if __name__ == '__main__':
         
         require(['vs/editor/editor.main'], () => {
             this.maximizedEditor = monaco.editor.create(document.getElementById('test-editor-maximized'), {
-                value: content,
+                value: content || '',
                 language: 'python',
                 theme: 'vs-dark',
                 minimap: { enabled: true },
@@ -2381,20 +2460,59 @@ if __name__ == '__main__':
         }
     }
     
-    deleteTestCase(testId) {
-        if (!confirm('Are you sure you want to delete this test case? This action cannot be undone.')) {
-            return;
-        }
-        
+    async deleteTestCase(testId) {
         try {
             const testCases = this.getTestCasesFromStorage();
-            const filteredTestCases = testCases.filter(tc => tc.id !== testId);
+            const testCase = testCases.find(tc => tc.id === testId);
             
-            this.saveTestCasesToStorage(filteredTestCases);
-            Utils.showToast('Test case deleted successfully! 🗑️', 'success');
+            if (!testCase) {
+                Utils.showToast('Test case not found!', 'warning');
+                return;
+            }
             
-            // Reload test cases
-            this.loadTestCases();
+            // Show custom confirmation dialog
+            const dialog = document.getElementById('confirmDialog');
+            const confirmDelete = document.getElementById('confirmDelete');
+            const confirmCancel = document.getElementById('confirmCancel');
+            
+            // Set test case name in the dialog
+            document.querySelector('.custom-confirm-body p').textContent = 
+                `Are you sure you want to delete "${testCase.name}"? This action cannot be undone.`;
+            
+            // Show the dialog
+            dialog.style.display = 'flex';
+            
+            // Wait for user action
+            const userConfirmed = await new Promise((resolve) => {
+                confirmDelete.onclick = () => {
+                    dialog.style.display = 'none';
+                    resolve(true);
+                };
+                
+                confirmCancel.onclick = () => {
+                    dialog.style.display = 'none';
+                    resolve(false);
+                };
+                
+                // Also close when clicking outside the dialog
+                dialog.onclick = (e) => {
+                    if (e.target === dialog) {
+                        dialog.style.display = 'none';
+                        resolve(false);
+                    }
+                };
+            });
+            
+            if (userConfirmed) {
+                const filteredTestCases = testCases.filter(tc => tc.id !== testId);
+                this.saveTestCasesToStorage(filteredTestCases);
+                
+                // Show success message
+                Utils.showToast('Test case has been deleted successfully!', 'success');
+                
+                // Reload test cases
+                this.loadTestCases();
+            }
         } catch (error) {
             Utils.showToast(`Failed to delete test case: ${error.message}`, 'danger');
         }

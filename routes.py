@@ -7,8 +7,39 @@ from app import app, db
 from models import User, Repository, TestCase, Analytics, CodeAnalysis
 from github_service import GitHubService
 from groq_service import GroqService
+from summary_service import get_project_summary
 import requests
 import logging
+
+PROJECT_SUMMARY = {
+    "name": "GitGenius",
+    "tagline": "AI-powered GitHub test case generator with Groq acceleration",
+    "mission": "Help engineers produce reliable automated tests faster by combining GitHub repository context with Groq language models and analytics.",
+    "capabilities": [
+        "Secure GitHub OAuth login and repository browsing",
+        "Groq-backed multi-language test generation with edge case handling",
+        "Persistent storage for generated test suites and analytics tracking",
+        "Real-time dashboard with repository insights and activity trends",
+        "Code analysis workflows for refactoring and vulnerability review"
+    ],
+    "how_it_works": [
+        "Authenticate with GitHub and select the repository or files you want to analyse.",
+        "GitGenius streams file content to Groq models to draft end-to-end, unit, and integration tests.",
+        "Review AI suggestions, adjust configurations, and export or commit the generated cases.",
+        "Track everything inside the analytics dashboard, including quality scores and technology coverage."
+    ],
+    "technology_stack": {
+        "backend": ["Flask 3", "Python 3.11", "SQLAlchemy", "Flask-Login"],
+        "frontend": ["Bootstrap 5", "Vanilla JS", "CSS3"],
+        "services": ["GitHub REST API", "Groq Inference API"],
+        "database": ["SQLite (dev)", "PostgreSQL (prod)"]
+    },
+    "deployment": {
+        "entry_point": "main.py",
+        "environment": ".env configuration for OAuth, Groq API, and DB settings",
+        "docker": "Dockerfile + docker-compose.yml for containerized setup"
+    }
+}
 
 # GitHub OAuth configuration
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "your_github_client_id")
@@ -19,13 +50,30 @@ def home():
     """Home page - login if not authenticated"""
     if 'access_token' in session:
         return redirect(url_for('dashboard'))
-    return render_template('home.html')
+
+    try:
+        summary = get_project_summary()
+    except Exception as exc:
+        logging.error(f"Failed to build project summary: {exc}")
+        summary = PROJECT_SUMMARY
+
+    return render_template('home.html', project_summary=summary)
+
+@app.route('/api/project-summary')
+def api_project_summary():
+    """Return machine-readable project summary details."""
+    try:
+        summary = get_project_summary()
+    except Exception as exc:
+        logging.error(f"Failed to build project summary: {exc}")
+        summary = PROJECT_SUMMARY
+    return jsonify(summary)
 
 @app.route('/auth/github')
 def github_auth():
     """Redirect to GitHub OAuth"""
     # Use localhost callback URL for development
-    callback_url = 'https://ai-gitgenius.onrender.com/auth/github/callback'
+    callback_url = 'http://localhost:5000/auth/github/callback'
     
     github_auth_url = (
         f"https://github.com/login/oauth/authorize?"

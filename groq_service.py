@@ -21,7 +21,7 @@ class GroqService:
                 self.base_url,
                 headers=self.headers,
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {
                             "role": "system",
@@ -44,19 +44,50 @@ class GroqService:
             return f"Error generating test cases: {str(e)}"
     
     def analyze_code_quality(self, code_content):
-        """Analyze code quality and provide a score"""
+        """Analyze code quality and provide a comprehensive report with score"""
         prompt = f"""
-        Analyze the following code for quality, readability, maintainability, and best practices.
-        Provide a score from 1-10 and brief explanation.
+        # Code Quality Analysis Report
         
-        Code:
-        {code_content}
+        ## 📊 Overall Assessment
+        Please analyze the following code and provide a detailed quality assessment.
         
-        Return response in JSON format:
-        {{
-            "score": 8.5,
-            "explanation": "Brief explanation of the score"
-        }}
+        ```python
+        {code_content[:2000]}  # Show first 2000 chars to avoid token limits
+        ```
+        
+        ## 📋 Analysis Sections
+        
+        ### 1. Code Quality Score (1-10)
+        - **Score:** [X.X/10]
+        - **Rationale:** Brief explanation of the score
+        
+        ### 2. Key Findings
+        - **✅ Strengths:** 
+          - [List key strengths]
+        - **⚠️ Areas for Improvement:**
+          - [List key issues]
+        
+        ### 3. Detailed Analysis
+        - **Code Structure:** [Analysis of structure]
+        - **Best Practices:** [Compliance with language standards]
+        - **Performance:** [Performance considerations]
+        - **Readability:** [Code readability assessment]
+        
+        ### 4. Recommendations
+        - **Critical Fixes:** [High-priority improvements]
+        - **Enhancements:** [Optional improvements]
+        - **Tools & Resources:** [Recommended tools/libraries]
+        
+        ## 🔍 Example Improvements
+        ```python
+        # Before:
+        # [Example of problematic code]
+        
+        # After:
+        # [Improved version of the code]
+        ```
+        
+        **Note:** Format your response in GitHub-flavored markdown with proper headers, code blocks, and emphasis.
         """
         
         try:
@@ -64,7 +95,7 @@ class GroqService:
                 self.base_url,
                 headers=self.headers,
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {
                             "role": "system",
@@ -93,47 +124,80 @@ class GroqService:
             return {"score": 5.0, "explanation": f"Error: {str(e)}"}
     
     def refactor_code(self, code_content, file_path):
-        """Suggest code refactoring improvements"""
+        """Generate comprehensive code refactoring suggestions with before/after examples"""
         prompt = f"""
-        You are an expert software engineer specializing in code refactoring and optimization. Analyze the following code and provide comprehensive refactoring suggestions.
-
-        **File:** {file_path}
-        **Code to Analyze:**
+        # 🔄 Code Refactoring Report
+        
+        ## 📂 File: `{file_path}`
+        
+        ## 🔍 Code Analysis
         ```{file_path.split('.')[-1] if '.' in file_path else 'text'}
-        {code_content}
+        {code_content[:2000]}  # First 2000 chars to avoid token limits
         ```
+        
+        ## 📋 Refactoring Recommendations
+        
+        ### 1. Code Smells Identified
+        - [ ] **Issue 1:** [Description] (Lines X-Y)
+        - [ ] **Issue 2:** [Description] (Lines A-B)
+        
+        ### 2. Suggested Refactoring
+        
+        #### 🔄 Before:
+        ```python
+        # Original code with issues
+        def example():
+            # ...
+        ```
+        
+        #### ✅ After:
+        ```python
+        # Refactored code
+        def improved_example():
+            # ...
+        ```
+        
+        ### 3. Key Improvements
+        - **Performance:** [Specific improvements]
+        - **Readability:** [Specific improvements]
+        - **Maintainability:** [Specific improvements]
+        
+        ### 4. Additional Recommendations
+        - [ ] [Specific recommendation 1]
+        - [ ] [Specific recommendation 2]
+        
+        ## 🔍 Detailed Analysis
+        
+        ### 1. Code Quality Assessment:
+        - Identify code smells and anti-patterns
+        - Assess complexity, readability, and maintainability
+        - Highlight areas that need improvement
 
-        **Please provide a detailed analysis including:**
+        ### 2. Specific Refactoring Suggestions:
+        - Function extraction opportunities
+        - Variable naming improvements
+        - Code duplication removal
+        - Performance optimizations
+        - Design pattern applications
 
-        1. **Code Quality Assessment:**
-           - Identify code smells and anti-patterns
-           - Assess complexity, readability, and maintainability
-           - Highlight areas that need improvement
+        ### 3. Before and After Examples:
+        - Show specific code blocks that need refactoring
+        - Provide improved versions with explanations
+        - Include step-by-step refactoring process
 
-        2. **Specific Refactoring Suggestions:**
-           - Function extraction opportunities
-           - Variable naming improvements
-           - Code duplication removal
-           - Performance optimizations
-           - Design pattern applications
+        ### 4. Best Practices Recommendations:
+        - Language-specific best practices
+        - SOLID principles application
+        - Error handling improvements
+        - Documentation suggestions
 
-        3. **Before and After Examples:**
-           - Show specific code blocks that need refactoring
-           - Provide improved versions with explanations
-           - Include step-by-step refactoring process
-
-        4. **Best Practices Recommendations:**
-           - Language-specific best practices
-           - SOLID principles application
-           - Error handling improvements
-           - Documentation suggestions
-
-        5. **Impact Assessment:**
-           - Expected improvements in maintainability
-           - Performance benefits
-           - Testing implications
-
+        ### 5. Impact Assessment:
+        - Expected improvements in maintainability
+        - Performance benefits
+        - Testing implications
+        
         **Format your response with clear sections, code examples, and actionable recommendations.**
+        Use GitHub-flavored markdown with proper code blocks, headers, and lists.
         """
         
         try:
@@ -141,7 +205,7 @@ class GroqService:
                 self.base_url,
                 headers=self.headers,
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {
                             "role": "system",
@@ -164,60 +228,91 @@ class GroqService:
             return f"Error analyzing code: {str(e)}"
     
     def check_vulnerabilities(self, code_content, file_path):
-        """Check code for security vulnerabilities"""
+        """Generate a comprehensive security vulnerability report"""
         prompt = f"""
-        You are a cybersecurity expert specializing in code security analysis. Perform a comprehensive security audit of the following code.
-
-        **File:** {file_path}
-        **Code to Analyze:**
+        # 🔒 Security Analysis Report
+        
+        ## 🎯 Target
+        **File:** `{file_path}`
+        
+        ## 🔍 Code Sample
         ```{file_path.split('.')[-1] if '.' in file_path else 'text'}
-        {code_content}
+        {code_content[:2000]}  # First 2000 chars to avoid token limits
         ```
+        
+        ## 📋 Executive Summary
+        - **Overall Risk Level:** [Critical/High/Medium/Low]
+        - **Vulnerabilities Found:** [Number]
+        - **Immediate Actions Required:** [Yes/No]
+        
+        ## 🚨 Critical Findings (if any)
+        
+        ### 1. [Vulnerability Name]
+        - **Severity:** 🔴 Critical
+        - **Location:** `file.py:XX-XX`
+        - **Description:** 
+          [Detailed description of the vulnerability]
+        - **Impact:** 
+          [Potential impact if exploited]
+        - **Remediation:**
+          ```python
+          # Before (vulnerable):
+          # [Vulnerable code]
+          
+          # After (fixed):
+          # [Secure code]
+          ```
+        - **References:**
+          - [Relevant CVE or security advisory]
+          - [OWASP Guide reference]
+        
+        ## 🔍 Detailed Analysis
+        
+        ### 1. Security Score
+        - **Overall Security Score:** [X/10]
+        - **Breakdown:**
+          - Authentication: [X/10]
+          - Authorization: [X/10]
+          - Input Validation: [X/10]
+          - Error Handling: [X/10]
+        - **Score Justification:** [Brief explanation of the score]
+        - **Priority Order for Fixes:** [List of vulnerabilities in order of priority]
+        
+        ### 2. Security Best Practices
+        - [ ] [Specific security practice 1]
+        - [ ] [Specific security practice 2]
+        
+        ### 3. Vulnerability Details
+        - **Location:** Line numbers or code sections
+        - **Description:** Detailed explanation of the vulnerability
+        - **Impact:** Potential consequences if exploited
+        - **Proof of Concept:** How the vulnerability could be exploited
 
-        **Please provide a detailed security analysis including:**
-
-        1. **Security Vulnerability Assessment:**
-           - Identify all potential security vulnerabilities
-           - Categorize by severity (Critical, High, Medium, Low)
-           - Explain the security implications of each issue
-
-        2. **Specific Vulnerabilities to Check:**
-           - **SQL Injection:** Unvalidated database queries
-           - **Cross-Site Scripting (XSS):** Unsanitized user input
-           - **Code Injection:** Dynamic code execution risks
-           - **Path Traversal:** File path manipulation
-           - **Authentication Issues:** Weak authentication mechanisms
-           - **Authorization Flaws:** Insufficient access controls
-           - **Input Validation:** Missing or weak input validation
-           - **Output Encoding:** Unsafe output rendering
-           - **Cryptographic Issues:** Weak encryption or hashing
-           - **Session Management:** Session security problems
-
-        3. **Detailed Findings:**
-           - **Vulnerability Type:** Specific security issue
-           - **Severity Level:** Critical/High/Medium/Low
-           - **Location:** Line numbers or code sections
-           - **Description:** Detailed explanation of the vulnerability
-           - **Impact:** Potential consequences if exploited
-           - **Proof of Concept:** How the vulnerability could be exploited
-
-        4. **Remediation Recommendations:**
-           - **Immediate Fixes:** Critical vulnerabilities that need urgent attention
-           - **Code Examples:** Secure code patterns and implementations
-           - **Best Practices:** Security best practices for the technology stack
-           - **Tools and Libraries:** Recommended security tools and libraries
-
-        5. **Security Score:**
-           - Provide an overall security score (1-10)
-           - Justify the score based on findings
-           - Suggest priority order for fixes
-
-        6. **Additional Security Considerations:**
-           - Environment-specific security concerns
-           - Compliance requirements (if applicable)
-           - Security testing recommendations
-
-        **Format your response with clear sections, severity indicators, and actionable security recommendations.**
+        ### 4. Remediation Recommendations
+        - **Immediate Fixes:** Critical vulnerabilities that need urgent attention
+        - **Code Examples:** Secure code patterns and implementations
+        - **Best Practices:** Security best practices for the technology stack
+        - **Tools and Libraries:** Recommended security tools and libraries
+        
+        ## 🛡️ Recommendations
+        1. **Immediate Actions:**
+           - [ ] [Action 1]
+           - [ ] [Action 2]
+        
+        2. **Long-term Improvements:**
+           - [ ] [Improvement 1]
+           - [ ] [Improvement 2]
+        
+        ## 🔍 Additional Security Considerations
+        - **Environment-specific Security Concerns:** [Details]
+        - **Compliance Requirements:** [If applicable]
+        - **Security Testing Recommendations:** [Specific tests to run]
+        
+        ## 🔗 Additional Resources
+        - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+        - [Security Best Practices Guide]
+        
+        **Format:** Use GitHub-flavored markdown with proper headers, code blocks, and emoji for better readability.
         """
         
         try:
@@ -225,11 +320,11 @@ class GroqService:
                 self.base_url,
                 headers=self.headers,
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are a cybersecurity expert specializing in code security analysis."
+                            "content": "You are a cybersecurity expert specializing in code security analysis and vulnerability assessment."
                         },
                         {
                             "role": "user",
@@ -244,8 +339,8 @@ class GroqService:
             result = response.json()
             return result['choices'][0]['message']['content']
         except requests.exceptions.RequestException as e:
-            logging.error(f"Error checking vulnerabilities: {e}")
-            return f"Error analyzing security: {str(e)}"
+            logging.error(f"Error checking for vulnerabilities: {e}")
+            return f"Error checking for vulnerabilities: {str(e)}"
     
     def generate_ai_report(self, prompt):
         """Generate AI-powered analytics report"""
@@ -254,7 +349,7 @@ class GroqService:
                 self.base_url,
                 headers=self.headers,
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "openai/gpt-oss-20b",
                     "messages": [
                         {
                             "role": "system",

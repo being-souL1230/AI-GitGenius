@@ -251,14 +251,37 @@ class AnimationUtils {
 
 // Initialize common functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Add glow effects to interactive elements
-    const interactiveElements = document.querySelectorAll('.glass-card, .btn, .nav-link');
-    interactiveElements.forEach(element => {
-        AnimationUtils.addGlowEffect(element);
+    const metricModals = document.querySelectorAll('.metric-modal');
+
+    metricModals.forEach(modalEl => {
+        modalEl.addEventListener('hidden.bs.modal', (event) => {
+            const trigger = document.querySelector(`[data-bs-target='#${modalEl.id}']`);
+            if (trigger) {
+                trigger.blur();
+            }
+        });
     });
+
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.glass-sidebar');
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+    // Add glow effect to interactive elements
+    const interactiveElements = document.querySelectorAll('.btn, .nav-link, .dropdown-item, .card, .repo-card, .metric-card, .form-control, .form-select');
+    if (interactiveElements && interactiveElements.length > 0) {
+        interactiveElements.forEach(element => {
+            AnimationUtils.addGlowEffect(element);
+        });
+    }
     
     // Add smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    const anchors = document.querySelectorAll('a[href^="#"]');
+    anchors.forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));

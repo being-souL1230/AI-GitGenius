@@ -21,11 +21,15 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-prod
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure the database
-if os.environ.get('VERCEL'):  # Running on Vercel
-    # For Vercel, use PostgreSQL
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable is required for Vercel deployment")
+if os.environ.get('VERCEL'):  # Running on Vercel with Turso
+    TURSO_DATABASE_URL = os.environ.get('TURSO_DATABASE_URL')
+    TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
+    
+    if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
+        # Format for SQLAlchemy with Turso
+        DATABASE_URL = f"sqlite+{TURSO_DATABASE_URL}/?authToken={TURSO_AUTH_TOKEN}&secure=true"
+    else:
+        raise ValueError("Turso database configuration is missing")
 else:  # Local or Render environment
     # For local development, use SQLite
     DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///github_test_generator.db')

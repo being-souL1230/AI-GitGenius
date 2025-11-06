@@ -26,15 +26,21 @@ if os.environ.get('VERCEL'):  # Running on Vercel with Turso
     TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN')
     
     if TURSO_DATABASE_URL and TURSO_AUTH_TOKEN:
-        # Format for SQLAlchemy with Turso
-        DATABASE_URL = f"sqlite+{TURSO_DATABASE_URL}/?authToken={TURSO_AUTH_TOKEN}&secure=true"
+        # For Turso, we'll use a custom connection pool
+        DATABASE_URL = f"{TURSO_DATABASE_URL}?authToken={TURSO_AUTH_TOKEN}"
+        # Set a flag to use libsql-client
+        os.environ['USE_LIBSQL_CLIENT'] = '1'
     else:
         raise ValueError("Turso database configuration is missing")
 else:  # Local or Render environment
     # For local development, use SQLite
     DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///github_test_generator.db')
 
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+if os.environ.get('USE_LIBSQL_CLIENT'):
+    # Configure SQLAlchemy to use libsql-client
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DATABASE_URL}"
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,

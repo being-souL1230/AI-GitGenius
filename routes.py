@@ -72,8 +72,8 @@ def api_project_summary():
 @app.route('/auth/github')
 def github_auth():
     """Redirect to GitHub OAuth"""
-    # Use localhost callback URL for development
-    callback_url = 'https://ai-gitgenius.onrender.com/callback'
+    # Get callback URL from environment variable or use default for local development
+    callback_url = os.environ.get('GITHUB_CALLBACK_URL', 'http://localhost:5000/auth/github/callback')
     
     github_auth_url = (
         f"https://github.com/login/oauth/authorize?"

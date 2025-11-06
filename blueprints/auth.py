@@ -17,7 +17,8 @@ GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "your_github_client_sec
 @limiter.limit("10 per minute")
 def github_auth():
     """Redirect to GitHub OAuth"""
-    callback_url = 'http://localhost:5000/auth/github/callback'
+    # Get callback URL from environment variable or use default for local development
+    callback_url = os.environ.get('GITHUB_CALLBACK_URL', 'http://localhost:5000/auth/github/callback')
     
     github_auth_url = (
         f"https://github.com/login/oauth/authorize?"
